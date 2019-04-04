@@ -1,6 +1,10 @@
 #ifndef PID_H
 #define PID_H
 
+#include <limits>
+#include <iostream>
+#include <vector>
+
 class PID {
  public:
   /**
@@ -31,6 +35,12 @@ class PID {
    */
   double TotalError();
 
+  /**
+   * Use Twiddle algorithm to tune PID parameters given cross track error.
+   * @param cte The current cross track error
+   */
+  void Twiddle(double cte);
+
  private:
   /**
    * PID Errors
@@ -39,6 +49,7 @@ class PID {
   double i_error;
   double d_error;
   double total_error;
+  double steer_value;
 
   /**
    * PID Coefficients
@@ -46,6 +57,20 @@ class PID {
   double Kp;
   double Ki;
   double Kd;
+
+  /**
+   * Twiddle variables
+   */
+  double p[3];
+  double dp[3];
+  int twiddle_step;
+  int index;
+  double best_err;
+  double tolerance;
+  /** 
+   * Initialization variable
+   */
+  bool init;
 };
 
 #endif  // PID_H
