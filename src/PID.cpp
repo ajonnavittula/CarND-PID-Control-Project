@@ -14,7 +14,7 @@ void PID::Init(double Kp_, double Ki_, double Kd_) {
    */
   Kp = Kp_;
   Ki = Ki_;
-  Kd_ = Kd_;
+  Kd = Kd_;
 
   p_error = 0.;
   i_error = 0.;
@@ -26,19 +26,20 @@ void PID::Init(double Kp_, double Ki_, double Kd_) {
   p[1] = Ki;
   p[2] = Kd;
   dp[0] = 0.01;
-  dp[1] = 0.0001;
-  dp[2] = 0.1;
+  dp[1] = 0.00001;
+  dp[2] = 0.001;
   twiddle_step = 0;
   index = 0;
   best_err = std::numeric_limits<double>::max();
   tolerance = 0.002;
+  time_step = 0;
 }
 
 void PID::UpdateError(double cte) {
   /**
    * TODO: Update PID errors based on cte.
    */
-  if ( !init) { 
+  if ( !init ) { 
     p_error = cte;
     init = true;
   }
@@ -48,8 +49,8 @@ void PID::UpdateError(double cte) {
   i_error += cte;
 
   Kp = p[0];
-  Kd = p[1];
-  Ki = p[2];
+  Ki = p[1];
+  Kd = p[2];
 
 }
 
@@ -67,44 +68,62 @@ double PID::TotalError() {
 
 void PID::Twiddle(double cte) {
 
+if (time_step % 1000)
+  {
+    //if (best_err > tolerance) {
 
-  if (best_err > tolerance) {
+      switch(twiddle_step) {
 
-    switch(twiddle_step) {
-
-      case 0: {
-                p[index] += dp[index];
-                twiddle_step++;
-                break;
-              }
-      case 1: {
-                if (cte < best_err) {
-                  best_err = cte;
-                  dp[index] *= 1.1;
-                }
-                else {
-                  p[index] -= 2 * dp[index];
-                }              
-                twiddle_step++;
-                break;
-              }
-      case 3: {
-                if (cte < best_err) {
-                  best_err = cte;
-                }
-                else {
+        case 0: {
                   p[index] += dp[index];
-                  dp[index] *= 0.9;
+                  twiddle_step++;
+                  std::cout<< "In Twiddle case 0" << std::endl;
+                  break;
                 }
-                twiddle_step = 0;
-                if (index < 2) { index++; }
-                else {index = 0;}
+        case 1: {
+                  if (cte < best_err) {
+                    best_err = cte;
+                    dp[index] *= 1.1;
+                  }
+                  else {
+                    p[index] -= 2 * dp[index];
+                  }              
+                  twiddle_step++;
+                  std::cout<< "In Twiddle case 1" << std::endl;
+                  break;
+                }
+        case 2: {
+                  if (cte < best_err) {
+                    best_err = cte;
+                  }
+                  else {
+                    p[index] += dp[index];
+                    dp[index] *= 0.9;
+                  }
+                  twiddle_step = 0;
+                  if (index < 2) { index++; }
+                  else {index = 0;}
+                  std::cout<< "In Twiddle case 2" << std::endl;
+                  break;
+                }
+        default:
+                std::cout<< "Unknown twiddle step reached. Twiddle Step: "
+                          << twiddle_step;
                 break;
-              }
-      default:
-              std::cout<< "Unknown twiddle step reached. Twiddle Step: "
-                        << twiddle_step;
-              break;
-    }
+      }
+    //}
+  }
+  time_step++;
+}
+
+double PID::GetGain(int i) {
+
+  switch(i) {
+
+    case 0: return Kp;
+    case 1: return Ki;
+    case 2: return Kd;
+    default: return 0; 
   }
 }
+

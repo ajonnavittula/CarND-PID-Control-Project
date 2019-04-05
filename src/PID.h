@@ -40,6 +40,11 @@ class PID {
    * @param cte The current cross track error
    */
   void Twiddle(double cte);
+  /**
+   * Use Twiddle algorithm to tune PID parameters given cross track error.
+   * @param cte The current cross track error
+   */
+  double GetGain(int i);
 
  private:
   /**
@@ -67,6 +72,7 @@ class PID {
   int index;
   double best_err;
   double tolerance;
+  int time_step;
   /** 
    * Initialization variable
    */
