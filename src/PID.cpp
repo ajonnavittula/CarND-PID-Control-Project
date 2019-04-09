@@ -68,7 +68,7 @@ double PID::TotalError() {
 
 void PID::Twiddle(double cte) {
 
-if (time_step % 1000)
+if (time_step < 100000 && (time_step % 100 == 0))
   {
     //if (best_err > tolerance) {
 
