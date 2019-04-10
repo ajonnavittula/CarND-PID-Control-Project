@@ -33,15 +33,12 @@ string hasData(string s) {
 int main() {
   uWS::Hub h;
 
-  PID pid_steer, pid_throttle;
-  /**
-   * TODO: Initialize the pid variable.
-   */
-  pid_steer.Init(0.32, 0.0004, 3.05349);
-  pid_throttle.Init(0.1, 0.0, 0.05);
+  PID pid_steer;
 
+  pid_steer.Init(0.332981, 0.000393439, 3.05349);
+  //Kp: 0.332981 Ki: 0.000393439 Kd:3.05349
 
-  h.onMessage([&pid_steer, &pid_throttle]
+  h.onMessage([&pid_steer]
     (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
                      uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -61,20 +58,11 @@ int main() {
           double speed = std::stod(j[1]["speed"].get<string>());
           double angle = std::stod(j[1]["steering_angle"].get<string>());
           double steer_value, throttle_value, Kp, Ki,Kd;
-          /**
-           * TODO: Calculate steering value here, remember the steering value is
-           *   [-1, 1].
-           * NOTE: Feel free to play around with the throttle and speed.
-           *   Maybe use another PID controller to control the speed!
-           */  
-          
+
           pid_steer.Twiddle(cte);
           pid_steer.UpdateError(cte);
           steer_value = pid_steer.TotalError();
 
-          //pid_throttle.Twiddle(cte);
-          //pid_throttle.UpdateError(cte);
-          //throttle_value = pid_throttle.TotalError();
           throttle_value = 0.3;
           // DEBUG
           Kp = pid_steer.GetGain(0);
